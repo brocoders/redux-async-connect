@@ -51,7 +51,6 @@ class ReduxAsyncConnect extends React.Component {
   static propTypes = {
     components: array.isRequired,
     params: object.isRequired,
-    location: object.isRequired,
     render: func.isRequired,
     toggleLoading: func.isRequired,
     initialDataLoaded: func.isRequired,
