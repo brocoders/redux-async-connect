@@ -46,7 +46,7 @@ export function loadOnServer({ components, params }, store, helpers) {
   });
 }
 
-@connect(() => ({}), {toggleLoading, initialDataLoaded})
+
 class ReduxAsyncConnect extends React.Component {
   static propTypes = {
     components: array.isRequired,
@@ -116,4 +116,4 @@ class ReduxAsyncConnect extends React.Component {
 
 }
 
-export default ReduxAsyncConnect;
+export default connect(() => ({}), {toggleLoading, initialDataLoaded})(ReduxAsyncConnect);

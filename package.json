@@ -2,7 +2,7 @@
   "name": "redux-async-connect",
   "version": "0.1.1",
   "description": "It allows you to request async data, store them in redux state and connect them to your react component.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Rezonans/redux-async-connect.git"
