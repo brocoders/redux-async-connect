@@ -14,25 +14,90 @@ or you just want pages to be solid, don't jump when data was loaded.
 This package consist of 2 parts: one part allows you to delay containers rendering until some async actions are happening.
 Another stores your data to redux state and connect your loaded data to your container.
 
-So, you can do something like: 
+## Installation & Usage
+
+Using [npm](https://www.npmjs.com/):
+
+    $ npm install redux-async-connect
 
 ```js
+import { Router, browserHistory } from 'react-router';
+import { ReduxAsyncConnect, asyncConnect } from 'redux-async-connect'
+import React from 'react'
+import { render } from 'react-dom'
+import createStore from './redux/create';
+
+// 1. Connect your data, similar to react-redux @connect
 @asyncConnect({
-  lunches: (params, helpers) => helpers.client.get('/lunches')
+  lunch: (params, helpers) => Promise.resolve({id: 1, name: 'Borsch'})
 })
-export default class Home extends Component {
-  static propTypes = {
-    lunches: PropTypes.object
-  };
-  
+class App extends React.Component {
   render() {
-    const lunches = this.props.lunches;
+    // 2. access data as props
+    const lunch = this.props.lunch
     return (
-      <div className={styles.home}>
-        {lunches.loaded && <Lunches lunches={lunches} />}
-      </div>
-    );
+      <div>{lunch.name}</div>
+    )
   }
+}
+
+// 3. Render `Router` with ReduxAsyncConnect middleware
+const store = createStore(browserHistory, window.__data);
+
+render((
+  <Provider store={store} key="provider">
+    <Router render={(props) => <ReduxAsyncConnect {...props}/>} history={browserHistory}>
+      <Route path="/" component={App}/>
+    </Router>
+  </Provider>
+), el)
+```
+
+### Server
+
+```js
+import { renderToString } from 'react-dom/server'
+import { match, RoutingContext } from 'react-router'
+import { ReduxAsyncConnect, loadOnServer } from 'async-props'
+import createHistory from 'history/lib/createMemoryHistory';
+import {Provider} from 'react-redux';
+import createStore from './redux/create';
+
+app.get('*', (req, res) => {
+  const history = createHistory();
+  const store = createStore(history, client);
+
+  match({ routes, location: req.url }, (err, redirect, renderProps) => {
+
+    // 1. load data
+    loadOnServer(renderProps, store).then(() => {
+
+      // 2. use `ReduxAsyncConnect` instead of `RoutingContext` and pass it `renderProps`
+      const appHTML = renderToString(
+        <Provider store={store} key="provider">
+          <ReduxAsyncConnect {...renderProps} />
+        </Provider>
+      )
+
+      // 3. render the Redux initial data into the server markup
+      const html = createPage(appHTML, store)
+      res.send(html)
+    })
+  })
+})
+
+function createPage(html, store) {
+  return `
+    <!doctype html>
+    <html>
+      <body>
+        <div id="app">${html}</div>
+
+        <!-- its a Redux initial data -->
+        <script dangerouslySetInnerHTML={{__html: `window.__data=${serialize(store.getState())};`}} charSet="UTF-8"/>
+      </body>
+    </html>
+  `
 }
 ```
 
