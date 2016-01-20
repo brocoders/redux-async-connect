@@ -1,6 +1,6 @@
 import React from 'react';
 import RouterContext from 'react-router/lib/RouterContext';
-import { toggleLoading, initialDataLoaded } from './asyncConnect';
+import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
 
 const { array, func, object, any } = React.PropTypes;
@@ -43,7 +43,7 @@ function asyncConnectPromises(components, params, store, helpers) {
 export function loadOnServer({ components, params }, store, helpers) {
   return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers))
     .catch(error => console.error('reduxAsyncConnect server promise error: ' + error)).then(() => {
-      store.dispatch(initialDataLoaded());
+      store.dispatch(endLoad());
     });
 }
 
@@ -51,9 +51,10 @@ class ReduxAsyncConnect extends React.Component {
   static propTypes = {
     components: array.isRequired,
     params: object.isRequired,
+    location: object.isRequired,
     render: func.isRequired,
-    toggleLoading: func.isRequired,
-    initialDataLoaded: func.isRequired,
+    beginGlobalLoad: func.isRequired,
+    endGlobalLoad: func.isRequired,
     helpers: any
   };
 
@@ -71,49 +72,43 @@ class ReduxAsyncConnect extends React.Component {
     super(props, context);
 
     this.state = {
-      prevProps: null
+      propsToShow: null
     };
   }
 
   componentDidMount() {
-    const { components, params } = this.props;
     const dataLoaded = this.context.store.getState().reduxAsyncConnect.loaded;
 
     if (!dataLoaded) { // we dont need it if we already made it on server-side
-      this.loadAsyncData(components, params).then(this.props.initialDataLoaded);
+      this.loadAsyncData(this.props);
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const { components, params } = nextProps;
-    this.loadAsyncData(components, params);
+    this.loadAsyncData(nextProps);
   }
 
-  loadAsyncData(components, params) {
-    const helpers = this.props.helpers;
+  loadAsyncData(props) {
+    const { components, params, helpers } = props;
     const store = this.context.store;
-
     const promises = asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers);
 
-    if (promises.length !== 0) {
-      this.setState({ prevProps: this.props, loading: true });
-      this.props.toggleLoading(true);
-
-      return Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
+    if (promises.length) {
+      this.props.beginGlobalLoad();
+      Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
         .then(() => {
-          this.setState({ prevProps: null, loading: false });
-          this.props.toggleLoading(false);
+          this.setState({propsToShow: props});
+          this.props.endGlobalLoad();
         });
-      }
-
-    return Promise.resolve();
+    } else {
+      this.setState({propsToShow: props});
+    }
   }
 
   render() {
-    const props = this.state.loading ? this.state.prevProps : this.props;
-    return this.props.render(props);
+    const {propsToShow} = this.state;
+    return propsToShow && this.props.render(propsToShow);
   }
-
 }
 
-export default connect(() => ({}), {toggleLoading, initialDataLoaded})(ReduxAsyncConnect);
+export default connect(() => ({}), {beginGlobalLoad, endGlobalLoad})(ReduxAsyncConnect);
