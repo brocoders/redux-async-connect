@@ -43,8 +43,8 @@ function asyncConnectPromises(components, params, store, helpers) {
 export function loadOnServer({ components, params }, store, helpers) {
   return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers))
     .catch(error => console.error('reduxAsyncConnect server promise error: ' + error)).then(() => {
-    store.dispatch(initialDataLoaded());
-  });
+      store.dispatch(initialDataLoaded());
+    });
 }
 
 class ReduxAsyncConnect extends React.Component {
