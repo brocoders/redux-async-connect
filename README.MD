@@ -14,11 +14,17 @@ or you just want pages to be solid, don't jump when data was loaded.
 This package consist of 2 parts: one part allows you to delay containers rendering until some async actions are happening.
 Another stores your data to redux state and connect your loaded data to your container.
 
-## Installation & Usage
+## Installation
 
 Using [npm](https://www.npmjs.com/):
 
     $ npm install redux-async-connect
+
+Also, You need install babel presets as peer dependencies
+
+    $ npm install babel-preset-es2015 babel-preset-react babel-preset-stage-0
+
+## Usage
 
 ```js
 import { Router, browserHistory } from 'react-router';
