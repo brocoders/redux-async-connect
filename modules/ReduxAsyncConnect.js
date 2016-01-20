@@ -41,11 +41,11 @@ function asyncConnectPromises(components, params, store, helpers) {
 }
 
 export function loadOnServer({ components, params }, store, helpers) {
-  return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers)).then(() => {
+  return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers))
+    .catch(error => console.error('reduxAsyncConnect server promise error: ' + error)).then(() => {
     store.dispatch(initialDataLoaded());
   });
 }
-
 
 class ReduxAsyncConnect extends React.Component {
   static propTypes = {
@@ -99,11 +99,12 @@ class ReduxAsyncConnect extends React.Component {
       this.setState({ prevProps: this.props, loading: true });
       this.props.toggleLoading(true);
 
-      return Promise.all(promises).then(() => {}).then(() => {
-        this.setState({ prevProps: null, loading: false });
-        this.props.toggleLoading(false);
-      });
-    }
+      return Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
+        .then(() => {
+            this.setState({ prevProps: null, loading: false });
+          this.props.toggleLoading(false);
+        });
+      }
 
     return Promise.resolve();
   }
