@@ -22,10 +22,10 @@ Using [npm](https://www.npmjs.com/):
 
 ```js
 import { Router, browserHistory } from 'react-router';
-import { ReduxAsyncConnect, asyncConnect } from 'redux-async-connect'
+import { ReduxAsyncConnect, asyncConnect, reducer as reduxAsyncConnect } from 'redux-async-connect'
 import React from 'react'
 import { render } from 'react-dom'
-import createStore from './redux/create';
+import { createStore, combineReducers } from 'redux';
 
 // 1. Connect your data, similar to react-redux @connect
 @asyncConnect({
@@ -41,9 +41,10 @@ class App extends React.Component {
   }
 }
 
-// 3. Render `Router` with ReduxAsyncConnect middleware
-const store = createStore(browserHistory, window.__data);
+// 3. Connect redux async reducer
+const store = createStore(combineReducers({reduxAsyncConnect}), window.__data);
 
+// 4. Render `Router` with ReduxAsyncConnect middleware
 render((
   <Provider store={store} key="provider">
     <Router render={(props) => <ReduxAsyncConnect {...props}/>} history={browserHistory}>
@@ -58,14 +59,14 @@ render((
 ```js
 import { renderToString } from 'react-dom/server'
 import { match, RoutingContext } from 'react-router'
-import { ReduxAsyncConnect, loadOnServer } from 'redux-async-connect'
+import { ReduxAsyncConnect, loadOnServer, reducer as reduxAsyncConnect } from 'redux-async-connect'
 import createHistory from 'history/lib/createMemoryHistory';
 import {Provider} from 'react-redux';
-import createStore from './redux/create';
+import { createStore, combineReducers } from 'redux';
 
 app.get('*', (req, res) => {
   const history = createHistory();
-  const store = createStore(history, client);
+  const store = createStore(combineReducers({reduxAsyncConnect}));
 
   match({ routes, location: req.url }, (err, redirect, renderProps) => {
 
