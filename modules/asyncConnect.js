@@ -4,22 +4,23 @@ const LOAD = 'reduxAsyncConnect/LOAD';
 const LOAD_SUCCESS = 'reduxAsyncConnect/LOAD_SUCCESS';
 const LOAD_FAIL = 'reduxAsyncConnect/LOAD_FAIL';
 const CLEAR = 'reduxAsyncConnect/CLEAR';
-const GLOBAL_LOADING = 'reduxAsyncConnect/GLOBAL_LOADING';
-const INITIAL_DATA_LOADED = 'reduxAsyncConnect/INITIAL_DATA_LOADED';
+const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
+const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
 
-export function reducer(state = {loading: false, loaded: false}, action = {}) {
+export function reducer(state = {loaded: false}, action = {}) {
   const stateSlice = state[action.key];
 
   switch (action.type) {
-    case INITIAL_DATA_LOADED:
+    case BEGIN_GLOBAL_LOAD:
       return {
         ...state,
-        loaded: true
+        loaded: false
       };
-    case GLOBAL_LOADING:
+    case END_GLOBAL_LOAD:
       return {
         ...state,
-        loading: action.state
+
+        loaded: true
       };
     case LOAD:
       return {
@@ -70,15 +71,12 @@ export function clearKey(key) {
   };
 }
 
-export function toggleLoading(newState) {
-  return {
-    type: GLOBAL_LOADING,
-    state: newState
-  };
+export function beginGlobalLoad() {
+  return { type: BEGIN_GLOBAL_LOAD };
 }
 
-export function initialDataLoaded() {
-  return { type: INITIAL_DATA_LOADED };
+export function endGlobalLoad() {
+  return { type: END_GLOBAL_LOAD };
 }
 
 function load(key) {
