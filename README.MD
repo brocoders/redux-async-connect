@@ -114,7 +114,7 @@ There are some solutions of problem described above:
   to fetch data for them. It doesn't integrated with React Router or Redux. So, you need to write you custom logic
   to delay routing transition for example.
 - [**react-resolver**](https://github.com/ericclemmons/react-resolver)
-  Works similar, but doesn't integrated with redux. 
+  Works similar, but isn't integrated with redux. 
 
 **Redux Async Connect** uses awesome [Redux](https://github.com/rackt/redux) to keep all fetched data in state.
 This integration gives you agility: 
@@ -132,4 +132,4 @@ until data is loaded.
 - [Rezonans team](https://github.com/Rezonans)
 
 ## Collaboration
-You're welcome to PR, and we appreciate any questions or issues, please [open an issue][issue]!
+You're welcome to PR, and we appreciate any questions or issues, please [open an issue](https://github.com/Rezonans/redux-async-connect/issues)!
