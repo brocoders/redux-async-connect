@@ -2,17 +2,16 @@ ReduxAsyncConnect for React Router
 ============
 [![npm version](https://img.shields.io/npm/v/redux-async-connect.svg?style=flat-square)](https://www.npmjs.com/package/redux-async-connect)
 
-How do you usually request data and store it to redux state?
-You create actions that do async jobs to load data, create reducer to save this data to redux state, 
-then connect data to your component or container.
+How do you usually request data and store it in redux state?
+You create actions that do async jobs to load data into reducers and thus to the redux state, 
+then connect the data as props to your component or container.
 
-Usually it's very similar routine tasks.
+We usually also want data to be preloaded, especially if you're building a universal app or don't want the page to flash with content when the data is finally loaded.
 
-Also, usually we want data to be preloaded. Especially if you're building universal app, 
-or you just want pages to be solid, don't jump when data was loaded.
+ReduxAsyncConnect makes blocking data fetchting at the component level trivial by combining 2 things:
 
-This package consist of 2 parts: one part allows you to delay containers rendering until some async actions are happening.
-Another stores your data to redux state and connect your loaded data to your container.
+- one component that allows you to delay containers rendering until async actions are done
+- a decorator or static function on a component that returns that promise for its data fetching
 
 ## Installation & Usage
 
@@ -28,10 +27,19 @@ import { render } from 'react-dom'
 import { createStore, combineReducers } from 'redux';
 
 // 1. Connect your data, similar to react-redux @connect
+// Decorator version
 @asyncConnect({
-  lunch: (params, helpers) => Promise.resolve({id: 1, name: 'Borsch'})
+  lunch: (params, store, helpers) => Promise.resolve({id: 1, name: 'Borsch'})
 })
 class App extends React.Component {
+  // 1. Same as the decorator but as a function
+  static reduxAsyncConnect(params, store, helpers) {
+    const {dispatch, getState} = store;
+    if (!helpers.isLoaded(getState())) {
+      return Promise.all([dispatch(loadWidgets())]);
+    }
+  }
+  
   render() {
     // 2. access data as props
     const lunch = this.props.lunch
@@ -102,37 +110,38 @@ function createPage(html, store) {
 }
 ```
 
-## [API](/docs/API.MD)
+## API
+You can find more detailed documentation on the [API page](/docs/API.MD).
 
-## Comparing with other libraries
+## Comparison with other libraries
 
-There are some solutions of problem described above:
+A few existing libraries try to solve the same issue:
 
 - [**AsyncProps**](https://github.com/rackt/async-props)
   It solves the same problem, but it doesn't work with redux state. Also it's significantly more complex inside, 
   because it contains lots of logic to connect data to props.
-  It uses callbacks against promises... 
+  It also uses callbacks and not promises
 - [**react-fetcher**](https://github.com/markdalgleish/react-fetcher)
-  It's very simple library too. But it provides you only interface for decorating your components and methods 
-  to fetch data for them. It doesn't integrated with React Router or Redux. So, you need to write you custom logic
+  It's very simple library too but it provides you only with the interface for decorating your components and methods 
+  to fetch data for them. It doesn't integrate with React Router or Redux which means you need to write custom logic
   to delay routing transition for example.
 - [**react-resolver**](https://github.com/ericclemmons/react-resolver)
-  Works similar, but isn't integrated with redux. 
+  Works similarly but isn't integrated with redux. 
 
 **Redux Async Connect** uses awesome [Redux](https://github.com/rackt/redux) to keep all fetched data in state.
-This integration gives you agility: 
+This integration gives you a few things: 
 
 - you can react on fetching actions like data loading or load success in your own reducers
-- you can create own middleware to handle Redux Async Connect actions
-- you can connect to loaded data anywhere else, just using simple redux @connect
+- you can create your own middleware to handle Redux Async Connect actions
+- you can connect to loaded data anywhere by using simple redux @connect
+- it is integrated with [React Router](https://github.com/rackt/react-router) to prevent routing transition 
+until data is loaded.
 - finally, you can debug and see your data using Redux Dev Tools
 
-Also it's integrated with [React Router](https://github.com/rackt/react-router) to prevent routing transition 
-until data is loaded.
 
 ## Contributors
 - [Rodion Salnik](https://github.com/sars)
 - [Rezonans team](https://github.com/Rezonans)
 
 ## Collaboration
-You're welcome to PR, and we appreciate any questions or issues, please [open an issue](https://github.com/Rezonans/redux-async-connect/issues)!
+You're welcome to submit a PR, and we appreciate any questions or issues, please [open an issue](https://github.com/Rezonans/redux-async-connect/issues)!
