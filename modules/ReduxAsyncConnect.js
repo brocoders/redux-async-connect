@@ -80,6 +80,8 @@ class ReduxAsyncConnect extends React.Component {
 
     if (!dataLoaded) { // we dont need it if we already made it on server-side
       this.loadAsyncData(this.props);
+    } else {
+      this.setState({propsToShow: this.props});
     }
   }
 
