@@ -101,7 +101,7 @@ class ReduxAsyncConnect extends React.Component {
 
       return Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
         .then(() => {
-            this.setState({ prevProps: null, loading: false });
+          this.setState({ prevProps: null, loading: false });
           this.props.toggleLoading(false);
         });
       }
