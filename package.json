@@ -12,7 +12,7 @@
     "lint": "eslint modules",
     "start": "babel-node example/server.js",
     "test": "npm run lint && karma start",
-    "postinstall": "node ./npm-scripts/postinstall.js"
+    "prepublish": "node ./npm-scripts/postinstall.js"
   },
   "keywords": [
     "redux",
