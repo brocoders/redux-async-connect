@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
 
-const LOAD = 'reduxAsyncConnect/LOAD';
-const LOAD_SUCCESS = 'reduxAsyncConnect/LOAD_SUCCESS';
-const LOAD_FAIL = 'reduxAsyncConnect/LOAD_FAIL';
-const CLEAR = 'reduxAsyncConnect/CLEAR';
-const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
-const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
+export const LOAD = 'reduxAsyncConnect/LOAD';
+export const LOAD_SUCCESS = 'reduxAsyncConnect/LOAD_SUCCESS';
+export const LOAD_FAIL = 'reduxAsyncConnect/LOAD_FAIL';
+export const CLEAR = 'reduxAsyncConnect/CLEAR';
+export const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
+export const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
 
 export function reducer(state = {loaded: false}, action = {}) {
   const stateSlice = state[action.key];

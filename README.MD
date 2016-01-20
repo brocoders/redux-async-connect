@@ -102,6 +102,8 @@ function createPage(html, store) {
 }
 ```
 
+## [API](/docs/API.MD)
+
 ## Comparing with other libraries
 
 There are some solutions of problem described above:
