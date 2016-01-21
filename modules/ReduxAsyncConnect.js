@@ -67,21 +67,23 @@ class ReduxAsyncConnect extends React.Component {
     }
   };
 
+  isLoaded() {
+    return this.context.store.getState().reduxAsyncConnect.loaded;
+  }
+
   constructor(props, context) {
     super(props, context);
 
     this.state = {
-      propsToShow: null
+      propsToShow: this.isLoaded() ? props : null
     };
   }
 
   componentDidMount() {
-    const dataLoaded = this.context.store.getState().reduxAsyncConnect.loaded;
+    const dataLoaded = this.isLoaded();
 
     if (!dataLoaded) { // we dont need it if we already made it on server-side
       this.loadAsyncData(this.props);
-    } else {
-      this.setState({propsToShow: this.props});
     }
   }
 
