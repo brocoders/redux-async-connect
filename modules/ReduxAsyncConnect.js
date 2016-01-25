@@ -17,7 +17,7 @@ function eachComponents(components, iterator) {
   for (let i = 0, l = components.length; i < l; i++) { // eslint-disable-line id-length
     if (typeof components[i] === 'object') {
       for (let [key, value] of Object.entries(components[i])) {
-        iterator(components[i][key], i, key);
+        iterator(value, i, key);
       }
     } else {
       iterator(components[i], i);
