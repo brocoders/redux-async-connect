@@ -36,15 +36,20 @@ function filterAndFlattenComponents(components) {
 }
 
 function asyncConnectPromises(components, params, store, helpers) {
+  components = filterAndFlattenComponents(components);
   return components.map(Component => Component.reduxAsyncConnect(params, store, helpers))
-    .filter(result => result && result.then instanceof Function);
+      .filter(result => result && result.then instanceof Function)
+      .map(promise => promise.catch(error => {
+        console.error('reduxAsyncConnect promise error: ' + error);
+        return {error: error};
+      }));
 }
 
 export function loadOnServer({ components, params }, store, helpers) {
-  return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers))
-    .catch(error => console.error('reduxAsyncConnect server promise error: ' + error)).then(() => {
-      store.dispatch(endGlobalLoad());
-    });
+  return Promise.all(asyncConnectPromises(components, params, store, helpers)).then(result => {
+    store.dispatch(endGlobalLoad());
+    return result;
+  });
 }
 
 class ReduxAsyncConnect extends React.Component {
@@ -98,15 +103,14 @@ class ReduxAsyncConnect extends React.Component {
   loadAsyncData(props) {
     const { components, params, helpers } = props;
     const store = this.context.store;
-    const promises = asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers);
+    const promises = asyncConnectPromises(components, params, store, helpers);
 
     if (promises.length) {
       this.props.beginGlobalLoad();
-      Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
-        .then(() => {
-          this.setState({propsToShow: props});
-          this.props.endGlobalLoad();
-        });
+      Promise.all(promises).then(() => {
+        this.setState({propsToShow: props});
+        this.props.endGlobalLoad();
+      });
     } else {
       this.setState({propsToShow: props});
     }
