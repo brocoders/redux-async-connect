@@ -91,6 +91,10 @@ class ReduxAsyncConnect extends React.Component {
     this.loadAsyncData(nextProps);
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.propsToShow !== nextState.propsToShow;
+  }
+
   loadAsyncData(props) {
     const { components, params, helpers } = props;
     const store = this.context.store;
