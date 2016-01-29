@@ -25,26 +25,36 @@ import { ReduxAsyncConnect, asyncConnect, reducer as reduxAsyncConnect } from 'r
 import React from 'react'
 import { render } from 'react-dom'
 import { createStore, combineReducers } from 'redux';
+import { loadWidgets } from './myModule';
 
 // 1. Connect your data, similar to react-redux @connect
 // Decorator version
 @asyncConnect({
   lunch: (params, store, helpers) => Promise.resolve({id: 1, name: 'Borsch'})
 })
-class App extends React.Component {
-  // 1. Same as the decorator but as a function
-  static reduxAsyncConnect(params, store, helpers) {
-    const {dispatch, getState} = store;
-    if (!helpers.isLoaded(getState())) {
-      return Promise.all([dispatch(loadWidgets())]);
-    }
-  }
-  
+class App extends React.Component {  
   render() {
     // 2. access data as props
-    const lunch = this.props.lunch
+    const lunch = this.props.lunch;
     return (
       <div>{lunch.name}</div>
+    )
+  }
+}
+
+class AppHeader extends React.Component {
+  // 1. Same as the decorator but as a function
+  static reduxAsyncConnect(params, store, helpers) {
+    const { dispatch } = store;
+    // loadWidgets here could be an action that does a HTTP call to our server 
+    return Promise.all([dispatch(loadWidgets())]);
+  }
+
+  render() {
+    // 2. access data as props
+    const widget = this.props.widget;
+    return (
+      <div>{widget}</div>
     )
   }
 }
