@@ -1,11 +1,20 @@
 import { connect } from 'react-redux';
 
+// use Function constructor to obtain a proper global object through `this`
+const isNode = (new Function("try {return this===global;}catch(e){return false;}"))();
+
+export const INIT_DEFERRED = 'reduxAsyncConnect/INIT_DEFERRED';
 export const LOAD = 'reduxAsyncConnect/LOAD';
 export const LOAD_SUCCESS = 'reduxAsyncConnect/LOAD_SUCCESS';
 export const LOAD_FAIL = 'reduxAsyncConnect/LOAD_FAIL';
 export const CLEAR = 'reduxAsyncConnect/CLEAR';
 export const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
 export const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
+
+const INITIAL_DEFERRED_STATE = {
+  loading: false,
+  loaded: false
+};
 
 export function reducer(state = {loaded: false}, action = {}) {
   const stateSlice = state[action.key];
@@ -59,6 +68,11 @@ export function reducer(state = {loaded: false}, action = {}) {
           loading: false
         }
       };
+    case INIT_DEFERRED:
+      return {
+        ...state,
+        [action.key]: INITIAL_DEFERRED_STATE
+    };
     default:
       return state;
   }
@@ -102,6 +116,13 @@ function loadFail(key, error) {
   };
 }
 
+function initDeferred(key) {
+  return {
+    type: INIT_DEFERRED,
+    key
+  };
+}
+
 function componentLoadCb(mapStateToProps, params, store, helpers) {
   const dispatch = store.dispatch;
 
@@ -126,12 +147,21 @@ function componentLoadCb(mapStateToProps, params, store, helpers) {
   return promises.length === 0 ? null : Promise.all(promises);
 }
 
-export function asyncConnect(mapStateToProps) {
+export function asyncConnect(mapStateToProps = {}, deferredProps = {}) {
   return Component => {
-    Component.reduxAsyncConnect = (params, store, helpers) => componentLoadCb(mapStateToProps, params, store, helpers);
+
+    Component.reduxAsyncConnect = (params, store, helpers) => componentLoadCb(mapStateToProps, params, store, helpers)
+    Component.reduxAsyncConnectDeferred = (params, store, helpers) => {
+      const dispatch = store.dispatch;
+      return isNode ?
+        // Skip loading deferred props on server-side
+        Object.keys(deferredProps).map(key => dispatch(initDeferred(key))) :
+        // Load deferred props if not server
+        componentLoadCb(deferredProps, params, store, helpers);
+    }
 
     const finalMapStateToProps = state => {
-      return Object.keys(mapStateToProps).reduce((result, key) => ({...result, [key]: state.reduxAsyncConnect[key]}), {});
+      return Object.keys({...mapStateToProps, ...deferredProps}).reduce((result, key) => ({...result, [key]: state.reduxAsyncConnect[key]}), {});
     };
 
     return connect(finalMapStateToProps)(Component);
