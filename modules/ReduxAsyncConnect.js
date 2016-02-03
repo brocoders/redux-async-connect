@@ -42,7 +42,7 @@ function asyncConnectPromises(components, params, store, helpers) {
 
 export function loadOnServer({ components, params }, store, helpers) {
   return Promise.all(asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers))
-    .catch(error => console.error('reduxAsyncConnect server promise error: ' + error)).then(() => {
+    .catch(error => console.error('reduxAsyncConnect server promise error: ', error)).then(() => {
       store.dispatch(endGlobalLoad());
     });
 }
@@ -107,7 +107,7 @@ class ReduxAsyncConnect extends React.Component {
     if (promises.length) {
       this.props.beginGlobalLoad();
       (loadDataCounterOriginal => {
-        Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
+        Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ', error))
             .then(() => {
               // We need to change propsToShow only if loadAsyncData that called this promise
               // is the last invocation of loadAsyncData method. Otherwise we can face situation
