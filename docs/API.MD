@@ -42,7 +42,7 @@ It should provide mapStateToProps object like that:
 
 ```js
 @asyncConnect({
-  lunches: (params, helpers) => helpers.client.get('/lunches')
+  lunches: (params, store, helpers) => helpers.client.get('/lunches')
 })
 export default class Home extends Component {
   // ...
