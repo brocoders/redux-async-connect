@@ -29,7 +29,7 @@
   "homepage": "https://github.com/Rezonans/redux-async-connect",
   "peerDependencies": {
     "react": "0.14.x",
-    "react-router": "2.0.0-rc5",
+    "react-router": "2.x.x",
     "react-redux": "4.x.x"
   },
   "devDependencies": {
