@@ -35,9 +35,17 @@ function filterAndFlattenComponents(components) {
   return flattened;
 }
 
-function asyncConnectPromises(components, params, store, helpers) {
-  return components.map(Component => Component.reduxAsyncConnect(params, store, helpers))
+
+function asyncConnectDeferredPromises(components, params, store, helpers) {
+  return components.map(Component => Component.reduxAsyncConnectDeferred(params, store, helpers))
     .filter(result => result && result.then instanceof Function);
+}
+
+function asyncConnectPromises(components, params, store, helpers) {
+  return [].concat(components.map(Component => Component.reduxAsyncConnect(params, store, helpers))
+    .filter(result => result && result.then instanceof Function),
+    asyncConnectDeferredPromises(components, params, store, helpers)
+  );
 }
 
 export function loadOnServer({ components, params }, store, helpers) {
@@ -84,7 +92,10 @@ class ReduxAsyncConnect extends React.Component {
   componentDidMount() {
     const dataLoaded = this.isLoaded();
 
-    if (!dataLoaded) { // we dont need it if we already made it on server-side
+    if (dataLoaded) {
+      // load deferred data if we already made initial load on server-side
+      this.loadDeferredData(this.props);
+    } else {
       this.loadAsyncData(this.props);
     }
   }
@@ -95,6 +106,21 @@ class ReduxAsyncConnect extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.propsToShow !== nextState.propsToShow;
+  }
+
+  loadDeferredData(props) {
+    const { components, params, helpers } = props;
+    const store = this.context.store;
+    const promises = asyncConnectDeferredPromises(filterAndFlattenComponents(components), params, store, helpers);
+
+    if (promises.length) {
+      Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ' + error))
+      .then(() => {
+        this.setState({propsToShow: props});
+      });
+    } else {
+      this.setState({propsToShow: props});
+    }
   }
 
   loadAsyncData(props) {
