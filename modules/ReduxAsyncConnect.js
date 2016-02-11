@@ -101,10 +101,11 @@ class ReduxAsyncConnect extends React.Component {
     const { components, params, helpers } = props;
     const store = this.context.store;
     const promises = asyncConnectPromises(filterAndFlattenComponents(components), params, store, helpers);
+    const isServerSide = typeof window !== 'object';
 
     loadDataCounter++;
 
-    if (promises.length) {
+    if (promises.length && isServerSide) {
       this.props.beginGlobalLoad();
       (loadDataCounterOriginal => {
         Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ', error))
