@@ -56,6 +56,7 @@ class ReduxAsyncConnect extends React.Component {
     render: func.isRequired,
     beginGlobalLoad: func.isRequired,
     endGlobalLoad: func.isRequired,
+    selectReduxAsyncConnectState: func.isRequired,
     helpers: any
   };
 
@@ -66,11 +67,14 @@ class ReduxAsyncConnect extends React.Component {
   static defaultProps = {
     render(props) {
       return <RouterContext {...props} />;
+    },
+    selectReduxAsyncConnectState(store) {
+      return store.getState().reduxAsyncConnect.loaded;
     }
   };
 
   isLoaded() {
-    return this.context.store.getState().reduxAsyncConnect.loaded;
+    return this.props.selectReduxAsyncConnectState(this.context.store);
   }
 
   constructor(props, context) {
