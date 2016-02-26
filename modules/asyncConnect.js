@@ -116,7 +116,7 @@ function wrapWithDispatch(asyncItems) {
       if (promiseOrResult !== undefined) {
         if (promiseOrResult.then instanceof Function) {
           dispatch(load(item.key));
-          promiseOrResult.then(data => dispatch(loadSuccess(item.key, data)))
+          return promiseOrResult.then(data => dispatch(loadSuccess(item.key, data)))
                          .catch(err => dispatch(loadFail(item.key, err)));
         }
 
