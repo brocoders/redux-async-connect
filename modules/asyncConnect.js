@@ -118,9 +118,10 @@ function wrapWithDispatch(asyncItems) {
           dispatch(load(item.key));
           promiseOrResult.then(data => dispatch(loadSuccess(item.key, data)))
                          .catch(err => dispatch(loadFail(item.key, err)));
+        } else {
+          dispatch(loadSuccess(item.key, promiseOrResult));
         }
 
-        dispatch(loadSuccess(item.key, promiseOrResult));
       }
       return promiseOrResult;
     }} : item
