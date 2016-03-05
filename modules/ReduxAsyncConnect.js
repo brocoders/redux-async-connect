@@ -61,9 +61,13 @@ function loadAsyncConnect({components, filter = () => true, ...rest}) {
 }
 
 export function loadOnServer(args) {
-  return loadAsyncConnect(args).promise.then(() => {
-    args.store.dispatch(endGlobalLoad());
-  });
+  const result = loadAsyncConnect(args);
+  if (result.async) {
+    result.promise.then(() => {
+      args.store.dispatch(endGlobalLoad());
+    });
+  }
+  return result.promise;
 }
 
 let loadDataCounter = 0;
