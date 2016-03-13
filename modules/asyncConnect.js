@@ -6,8 +6,12 @@ export const LOAD_FAIL = 'reduxAsyncConnect/LOAD_FAIL';
 export const CLEAR = 'reduxAsyncConnect/CLEAR';
 export const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
 export const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
+const initialState = {
+  loaded: false,
+  deferredLoaded: true,
+};
 
-export function reducer(state = {loaded: false}, action = {}) {
+export function reducer(state = initialState, action = {}) {
   switch (action.type) {
     case BEGIN_GLOBAL_LOAD:
       return {
@@ -17,7 +21,8 @@ export function reducer(state = {loaded: false}, action = {}) {
     case END_GLOBAL_LOAD:
       return {
         ...state,
-        loaded: true
+        loaded: true,
+        deferredLoaded: !action.loadDeferred,
       };
     case LOAD:
       return {
@@ -81,8 +86,11 @@ export function beginGlobalLoad() {
   return { type: BEGIN_GLOBAL_LOAD };
 }
 
-export function endGlobalLoad() {
-  return { type: END_GLOBAL_LOAD };
+export function endGlobalLoad(loadDeferred = false) {
+  return {
+    type: END_GLOBAL_LOAD,
+    loadDeferred: loadDeferred,
+  };
 }
 
 function load(key) {
