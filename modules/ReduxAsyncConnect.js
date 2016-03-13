@@ -16,7 +16,7 @@ const { array, func, object, any } = React.PropTypes;
 function eachComponents(components, iterator) {
   for (let i = 0, l = components.length; i < l; i++) { // eslint-disable-line id-length
     if (typeof components[i] === 'object') {
-      for (let [key, value] of Object.entries(components[i])) {
+      for (const [key, value] of Object.entries(components[i])) {
         iterator(value, i, key);
       }
     } else {
@@ -35,36 +35,48 @@ function filterAndFlattenComponents(components) {
   return flattened;
 }
 
-function loadAsyncConnect({components, filter = () => true, ...rest}) {
-  let async = false;
+function loadAsyncConnect({components, fetchDeferred, ...rest}) {
+  let hasAsync = false;
+  let loadDeferred = false;
   const promise = Promise.all(filterAndFlattenComponents(components).map(Component => {
     const asyncItems = Component.reduxAsyncConnect;
 
     return Promise.all(asyncItems.reduce((itemsResults, item) => {
       let promiseOrResult = item.promise(rest);
 
-      if (filter(item, Component)) {
+      if (!loadDeferred && !fetchDeferred) {
+        loadDeferred = item.deferred;
+      }
+
+      const loadItem = fetchDeferred ? item.deferred : item;
+
+      if (loadItem) {
         if (promiseOrResult && promiseOrResult.then instanceof Function) {
-          async = true;
+          hasAsync = true;
           promiseOrResult = promiseOrResult.catch(error => ({error}));
         }
         return [...itemsResults, promiseOrResult];
-      } else {
-        return itemsResults;
       }
+
+      return itemsResults;
     }, [])).then(results => {
-      return asyncItems.reduce((result, item, i) => ({...result, [item.key]: results[i]}), {});
+      return asyncItems.reduce((result, item, index) =>
+                               ({...result, [item.key]: results[index]}), {});
     });
   }));
 
-  return {promise, async};
+  return {
+    promise,
+    hasAsync,
+    loadDeferred,
+  };
 }
 
 export function loadOnServer(args) {
   const result = loadAsyncConnect(args);
-  if (result.async) {
+  if (result.hasAsync) {
     result.promise.then(() => {
-      args.store.dispatch(endGlobalLoad());
+      args.store.dispatch(endGlobalLoad(result.loadDeferred));
     });
   }
   return result.promise;
@@ -92,10 +104,6 @@ class ReduxAsyncConnect extends React.Component {
     }
   };
 
-  isLoaded() {
-    return this.context.store.getState().reduxAsyncConnect.loaded;
-  }
-
   constructor(props, context) {
     super(props, context);
 
@@ -106,29 +114,42 @@ class ReduxAsyncConnect extends React.Component {
 
   componentDidMount() {
     const dataLoaded = this.isLoaded();
+    const fetchDeferred = !this.isDeferredLoaded();
 
-    if (!dataLoaded) { // we dont need it if we already made it on server-side
-      this.loadAsyncData(this.props);
+    if (!dataLoaded || fetchDeferred) { // we dont need it if we already made it on server-side
+      this.loadAsyncData(this.props, fetchDeferred);
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    this.loadAsyncData(nextProps);
+    const deferredLoaded = this.isDeferredLoaded();
+
+    if (deferredLoaded) {
+      this.loadAsyncData(nextProps);
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.propsToShow !== nextState.propsToShow;
   }
 
-  loadAsyncData(props) {
+  isLoaded() {
+    return this.context.store.getState().reduxAsyncConnect.loaded;
+  }
+
+  isDeferredLoaded() {
+    return this.context.store.getState().reduxAsyncConnect.deferredLoaded;
+  }
+
+  loadAsyncData(props, fetchDeferred) {
     const store = this.context.store;
-    const loadResult = loadAsyncConnect({...props, store});
+    const loadResult = loadAsyncConnect({...props, store, fetchDeferred});
 
     loadDataCounter++;
 
-    if (loadResult.async) {
+    if (loadResult.hasAsync) {
       this.props.beginGlobalLoad();
-      (loadDataCounterOriginal => {
+      ((loadDataCounterOriginal) => {
         loadResult.promise.then(() => {
           // We need to change propsToShow only if loadAsyncData that called this promise
           // is the last invocation of loadAsyncData method. Otherwise we can face situation
@@ -146,7 +167,7 @@ class ReduxAsyncConnect extends React.Component {
   }
 
   render() {
-    const {propsToShow} = this.state;
+    const { propsToShow } = this.state;
     return propsToShow && this.props.render(propsToShow);
   }
 }
