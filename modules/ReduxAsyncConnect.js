@@ -41,7 +41,12 @@ function loadAsyncConnect({components, filter = () => true, ...rest}) {
     const asyncItems = Component.reduxAsyncConnect;
 
     return Promise.all(asyncItems.reduce((itemsResults, item) => {
-      let promiseOrResult = item.promise(rest);
+      let promiseOrResult;
+      try {
+        promiseOrResult = item.promise(rest);
+      } catch (err) {
+        console.error(err);
+      }
 
       if (filter(item, Component)) {
         if (promiseOrResult && promiseOrResult.then instanceof Function) {
