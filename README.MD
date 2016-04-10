@@ -34,7 +34,7 @@ import { createStore, combineReducers } from 'redux';
 class App extends React.Component {
   render() {
     // 2. access data as props
-    const lunch = this.props.lunch
+    const lunch = this.props.lunch.data
     return (
       <div>{lunch.name}</div>
     )
@@ -45,9 +45,13 @@ class App extends React.Component {
 const store = createStore(combineReducers({reduxAsyncConnect}), window.__data);
 
 // 4. Render `Router` with ReduxAsyncConnect middleware
+const renderWithMiddleware = (props) => (
+  <ReduxAsyncConnect {...props} helpers={/* any helpers you want to add */}/>
+);
+
 render((
   <Provider store={store} key="provider">
-    <Router render={(props) => <ReduxAsyncConnect {...props}/>} history={browserHistory}>
+    <Router render={renderWithMiddleware} history={browserHistory}>
       <Route path="/" component={App}/>
     </Router>
   </Provider>
