@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/Rezonans/redux-async-connect",
   "peerDependencies": {
-    "react": "0.14.x",
+    "react": "15.x.x",
     "react-router": "2.x.x",
     "react-redux": "4.x.x"
   },
