@@ -62,11 +62,19 @@ function loadAsyncConnect({components, filter = () => true, ...rest}) {
 
 export function loadOnServer(args) {
   const result = loadAsyncConnect(args);
-  if (result.async) {
-    result.promise.then(() => {
-      args.store.dispatch(endGlobalLoad());
-    });
+  const {store: {dispatch}} = args
+
+  // Some of the routes might have no async components.
+  // For such cases signal that global loading has been completed
+  if (!result.async) {
+    dispatch(endGlobalLoad());
+    return result.promise;
   }
+
+  result.promise.then(() => {
+    dispatch(endGlobalLoad());
+  });
+
   return result.promise;
 }
 
