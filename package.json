@@ -1,5 +1,5 @@
 {
-  "name": "redux-async-connect",
+  "name": "fmp-redux-async-connect",
   "version": "0.1.13",
   "description": "It allows you to request async data, store them in redux state and connect them to your react component.",
   "main": "lib/index.js",
@@ -21,7 +21,7 @@
     "async",
     "props"
   ],
-  "author": "Rodion Salnik (http://brocoders.com)",
+  "author": "Tech Findmypast",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Rezonans/redux-async-connect/issues"
