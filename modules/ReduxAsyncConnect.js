@@ -138,6 +138,8 @@ class ReduxAsyncConnect extends React.Component {
             this.setState({propsToShow: props});
           }
           this.props.endGlobalLoad();
+        }).cache(e => {
+          console.error("Exception caught by ReduxAsyncConnect: ", e.stack);
         });
       })(loadDataCounter);
     } else {
