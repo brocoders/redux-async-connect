@@ -15,7 +15,7 @@ Usually it is provided by react Router component or match method from react rout
 
 ##### `render` (required)
 Function that accepts props and uses to render components.
-Usually it's just <RouterContext {...props} /> (by default)
+Usually it's just `<RouterContext {...props} />` (by default)
 
 ##### `helpers`
 Any helpers you may want pass to your reduxAsyncConnect static method.
