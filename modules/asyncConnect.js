@@ -7,36 +7,37 @@ export const CLEAR = 'reduxAsyncConnect/CLEAR';
 export const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
 export const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
 
-export function reducer(state = {loaded: false}, action = {}) {
+export function reducer(state = {loaded: false, loading: false}, action = {}) {
   const stateSlice = state[action.key];
 
   switch (action.type) {
     case BEGIN_GLOBAL_LOAD:
       return {
         ...state,
+        loading: true,
         loaded: false
       };
     case END_GLOBAL_LOAD:
       return {
         ...state,
-
+        loading: false,
         loaded: true
       };
     case LOAD:
       return {
         ...state,
+        loading: true,
         [action.key]: {
           ...stateSlice,
-          loading: true,
           loaded: false
         }
       };
     case LOAD_SUCCESS:
       return {
         ...state,
+        loading: false,
         [action.key]: {
           ...stateSlice,
-          loading: false,
           loaded: true,
           data: action.data
         }
@@ -44,9 +45,9 @@ export function reducer(state = {loaded: false}, action = {}) {
     case LOAD_FAIL:
       return {
         ...state,
+        loading: false,
         [action.key]: {
           ...stateSlice,
-          loading: false,
           loaded: false,
           error: action.error
         }
@@ -54,9 +55,9 @@ export function reducer(state = {loaded: false}, action = {}) {
     case CLEAR:
       return {
         ...state,
+        loading: false,
         [action.key]: {
-          loaded: false,
-          loading: false
+          loaded: false
         }
       };
     default:
