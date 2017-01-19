@@ -16,9 +16,9 @@ const { array, func, object, any } = React.PropTypes;
 function eachComponents(components, iterator) {
   for (let i = 0, l = components.length; i < l; i++) { // eslint-disable-line id-length
     if (typeof components[i] === 'object') {
-      for (let [key, value] of Object.entries(components[i])) {
-        iterator(value, i, key);
-      }
+      Object.keys(components[i]).forEach((key) => {
+        iterator(components[i][key], i, key);
+      });
     } else {
       iterator(components[i], i);
     }
