@@ -1,5 +1,5 @@
 .babelrc
-.eslintrc
+.eslintrc.js
 .travis.yml
 __tests__
 scripts
