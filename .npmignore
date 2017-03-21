@@ -8,3 +8,4 @@ karma.conf.js
 tests.webpack.js
 webpack.config.js
 .idea
+.vscode
