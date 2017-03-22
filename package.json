@@ -30,7 +30,7 @@
   "peerDependencies": {
     "react": "15.x.x",
     "react-router": "3.x.x",
-    "react-redux": "4.x.x"
+    "react-redux": "5.x.x"
   },
   "devDependencies": {
     "babel-cli": "6.24.0",
