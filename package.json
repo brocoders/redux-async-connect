@@ -1,6 +1,6 @@
 {
   "name": "redux-async-connect",
-  "version": "0.1.13",
+  "version": "1.0.0-rc4",
   "description": "It allows you to request async data, store them in redux state and connect them to your react component.",
   "main": "lib/index.js",
   "repository": {
