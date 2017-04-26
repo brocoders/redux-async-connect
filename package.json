@@ -28,9 +28,10 @@
   },
   "homepage": "https://github.com/Rezonans/redux-async-connect",
   "peerDependencies": {
-    "react": "0.14.x",
-    "react-router": "2.x.x",
-    "react-redux": "4.x.x"
+    "prop-types": "^15.5.x",
+    "react": "^15.5.x",
+    "react-router": "^3.0.0",
+    "react-redux": "^5.0.x"
   },
   "devDependencies": {
     "babel-cli": "^6.4.5",
@@ -57,9 +58,10 @@
     "karma-webpack": "^1.7.0",
     "mocha": "^2.0.1",
     "pretty-bytes": "^2.0.1",
-    "react": "^0.14.2",
-    "react-dom": "^0.14.2",
-    "react-router": "2.0.0-rc5",
+    "prop-types": "^15.5.8",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-router": "^3.0.0",
     "rimraf": "^2.4.2",
     "webpack": "^1.12.6",
     "webpack-dev-middleware": "^1.2.0",
