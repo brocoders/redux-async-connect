@@ -1,5 +1,5 @@
 {
-  "name": "redux-async-connect",
+  "name": "@liveauctioneers/redux-async-connect",
   "version": "2.0.0",
   "description": "It allows you to request async data, store them in redux state and connect them to your react component.",
   "main": "lib/index.js",
