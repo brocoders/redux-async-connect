@@ -36,14 +36,19 @@ function filterAndFlattenComponents(components) {
   return flattened;
 }
 
-function loadAsyncConnect({components, filter = () => true, ...rest}) {
+function loadAsyncConnect({components, filter = () => true, skip = () => false, ...rest}) {
   let async = false;
   const promise = Promise.all(filterAndFlattenComponents(components).map(Component => {
     const asyncItems = Component.reduxAsyncConnect;
 
     return Promise.all(asyncItems.reduce((itemsResults, item) => {
+      if (skip(item)) {
+        return itemsResults;
+      }
+
+      let promiseOrResult = item.promise(rest);
+
       if (filter(item, Component)) {
-        let promiseOrResult = item.promise(rest);
         if (promiseOrResult && promiseOrResult.then instanceof Function) {
           async = true;
           promiseOrResult = promiseOrResult.catch(error => ({error}));
