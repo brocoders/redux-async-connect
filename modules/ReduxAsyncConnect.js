@@ -64,12 +64,12 @@ function loadAsyncConnect({components, filter = () => true, skip = () => false, 
     });
   }));
 
-  return {promise, async: async || incomplete};
+  return {promise, async, incomplete};
 }
 
 export function loadOnServer(args) {
   const result = loadAsyncConnect(args);
-  if (result.async) {
+  if (result.async && !result.incomplete) {
     result.promise.then(() => {
       args.store.dispatch(endGlobalLoad());
     });
