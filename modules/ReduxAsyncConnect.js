@@ -38,11 +38,13 @@ function filterAndFlattenComponents(components) {
 
 function loadAsyncConnect({components, filter = () => true, skip = () => false, ...rest}) {
   let async = false;
+  let incomplete = false;
   const promise = Promise.all(filterAndFlattenComponents(components).map(Component => {
     const asyncItems = Component.reduxAsyncConnect;
 
     return Promise.all(asyncItems.reduce((itemsResults, item) => {
       if (skip(item)) {
+        incomplete = true;
         return itemsResults;
       }
 
@@ -62,7 +64,7 @@ function loadAsyncConnect({components, filter = () => true, skip = () => false, 
     });
   }));
 
-  return {promise, async};
+  return {promise, async: async || incomplete};
 }
 
 export function loadOnServer(args) {
