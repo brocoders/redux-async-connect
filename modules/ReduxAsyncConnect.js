@@ -4,7 +4,7 @@ import RouterContext from 'react-router/lib/RouterContext';
 import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
 
-const { array, func, object, any } = PropTypes;
+const { array, func, object, any, bool } = PropTypes;
 
 /**
  * We need to iterate over all components for specified routes.
@@ -84,6 +84,7 @@ class ReduxAsyncConnect extends React.Component {
     render: func.isRequired,
     beginGlobalLoad: func.isRequired,
     endGlobalLoad: func.isRequired,
+    renderIfNotLoaded: bool,
     helpers: any
   };
 
@@ -105,7 +106,7 @@ class ReduxAsyncConnect extends React.Component {
     super(props, context);
 
     this.state = {
-      propsToShow: this.isLoaded() ? props : null
+      propsToShow: props.renderIfNotLoaded || this.isLoaded() ? props : null
     };
   }
 
