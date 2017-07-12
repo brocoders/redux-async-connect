@@ -2,8 +2,9 @@ import React from 'react';
 import RouterContext from 'react-router/lib/RouterContext';
 import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
-const { array, func, object, any } = React.PropTypes;
+const { array, func, object, any } = PropTypes;
 
 /**
  * We need to iterate over all components for specified routes.
