@@ -8,8 +8,6 @@ export const BEGIN_GLOBAL_LOAD = 'reduxAsyncConnect/BEGIN_GLOBAL_LOAD';
 export const END_GLOBAL_LOAD = 'reduxAsyncConnect/END_GLOBAL_LOAD';
 
 export function reducer(state = {loaded: false}, action = {}) {
-  const stateSlice = state[action.key];
-
   switch (action.type) {
     case BEGIN_GLOBAL_LOAD:
       return {
@@ -19,45 +17,53 @@ export function reducer(state = {loaded: false}, action = {}) {
     case END_GLOBAL_LOAD:
       return {
         ...state,
-
         loaded: true
       };
     case LOAD:
       return {
         ...state,
-        [action.key]: {
-          ...stateSlice,
-          loading: true,
-          loaded: false
+        loadState: {
+          [action.key]: {
+            loading: true,
+            loaded: false
+          }
         }
       };
     case LOAD_SUCCESS:
       return {
         ...state,
-        [action.key]: {
-          ...stateSlice,
-          loading: false,
-          loaded: true,
-          data: action.data
-        }
+        loadState: {
+          [action.key]: {
+            loading: false,
+            loaded: true,
+            error: null
+          }
+        },
+        [action.key]: action.data
       };
     case LOAD_FAIL:
       return {
         ...state,
-        [action.key]: {
-          ...stateSlice,
-          loading: false,
-          loaded: false,
-          error: action.error
-        }
+        loadState: {
+          [action.key]: {
+            loading: false,
+            loaded: false,
+            error: action.error
+          }
+        },
+        [action.key]: null
       };
     case CLEAR:
       return {
         ...state,
-        [action.key]: {
-          loaded: false,
-          loading: false
-        }
+        loadState: {
+          [action.key]: {
+            loading: false,
+            loaded: false,
+            error: null
+          }
+        },
+        [action.key]: null
       };
     default:
       return state;
@@ -102,36 +108,35 @@ function loadFail(key, error) {
   };
 }
 
-function componentLoadCb(mapStateToProps, params, store, helpers) {
-  const dispatch = store.dispatch;
+function wrapWithDispatch(asyncItems) {
+  return asyncItems.map(item =>
+    item.key ? {...item, promise: (options) => {
+      const {dispatch} = options.store;
+      const promiseOrResult = item.promise(options);
+      if (promiseOrResult !== undefined) {
+        if (promiseOrResult.then instanceof Function) {
+          dispatch(load(item.key));
+          promiseOrResult.then(data => dispatch(loadSuccess(item.key, data)))
+                         .catch(err => dispatch(loadFail(item.key, err)));
+        } else {
+          dispatch(loadSuccess(item.key, promiseOrResult));
+        }
 
-  const promises = Object.keys(mapStateToProps).reduce((result, key) => {
-    let promiseOrResult = mapStateToProps[key](params, {...helpers, store});
-
-    if (promiseOrResult !== undefined) {
-      if (promiseOrResult.then instanceof Function) {
-        dispatch(load(key));
-        promiseOrResult = promiseOrResult
-          .then(nextData => dispatch(loadSuccess(key, nextData)),
-            err => dispatch(loadFail(key, err)));
-
-        return [...result, promiseOrResult];
       }
-
-      dispatch(loadSuccess(key, promiseOrResult));
-    }
-    return [...result];
-  }, []);
-
-  return promises.length === 0 ? null : Promise.all(promises);
+      return promiseOrResult;
+    }} : item
+  );
 }
 
-export function asyncConnect(mapStateToProps) {
+export function asyncConnect(asyncItems) {
   return Component => {
-    Component.reduxAsyncConnect = (params, store, helpers) => componentLoadCb(mapStateToProps, params, store, helpers);
+    Component.reduxAsyncConnect = wrapWithDispatch(asyncItems);
 
     const finalMapStateToProps = state => {
-      return Object.keys(mapStateToProps).reduce((result, key) => ({...result, [key]: state.reduxAsyncConnect[key]}), {});
+      return asyncItems.reduce((result, item) =>
+        item.key ? {...result, [item.key]: state.reduxAsyncConnect[item.key]} : result,
+        {}
+      );
     };
 
     return connect(finalMapStateToProps)(Component);

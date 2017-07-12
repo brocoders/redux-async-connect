@@ -1,5 +1,5 @@
 .babelrc
-.eslintrc
+.eslintrc.js
 .travis.yml
 __tests__
 scripts
@@ -8,3 +8,4 @@ karma.conf.js
 tests.webpack.js
 webpack.config.js
 .idea
+.vscode
