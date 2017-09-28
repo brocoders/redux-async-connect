@@ -1,9 +1,8 @@
 import React from 'react';
+import { array, func, object, any } from 'prop-types';
 import RouterContext from 'react-router/lib/RouterContext';
 import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
-
-const { array, func, object, any } = React.PropTypes;
 
 /**
  * We need to iterate over all components for specified routes.
@@ -108,26 +107,26 @@ class ReduxAsyncConnect extends React.Component {
       this.props.beginGlobalLoad();
       (loadDataCounterOriginal => {
         Promise.all(promises).catch(error => console.error('reduxAsyncConnect server promise error: ', error))
-            .then(() => {
-              // We need to change propsToShow only if loadAsyncData that called this promise
-              // is the last invocation of loadAsyncData method. Otherwise we can face situation
-              // when user is changing route several times and we finally show him route that has
-              // loaded props last time and not the last called route
-              if (loadDataCounter === loadDataCounterOriginal) {
-                this.setState({propsToShow: props});
-              }
-              this.props.endGlobalLoad();
-            });
+          .then(() => {
+            // We need to change propsToShow only if loadAsyncData that called this promise
+            // is the last invocation of loadAsyncData method. Otherwise we can face situation
+            // when user is changing route several times and we finally show him route that has
+            // loaded props last time and not the last called route
+            if (loadDataCounter === loadDataCounterOriginal) {
+              this.setState({ propsToShow: props });
+            }
+            this.props.endGlobalLoad();
+          });
       })(loadDataCounter);
     } else {
-      this.setState({propsToShow: props});
+      this.setState({ propsToShow: props });
     }
   }
 
   render() {
-    const {propsToShow} = this.state;
+    const { propsToShow } = this.state;
     return propsToShow && this.props.render(propsToShow);
   }
 }
 
-export default connect(null, {beginGlobalLoad, endGlobalLoad})(ReduxAsyncConnect);
+export default connect(null, { beginGlobalLoad, endGlobalLoad })(ReduxAsyncConnect);
