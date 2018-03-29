@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import RouterContext from 'react-router/lib/RouterContext';
-import { beginGlobalLoad, endGlobalLoad } from './asyncConnect';
+import { beginGlobalLoad, endGlobalLoad, fullEndGlobalLoad } from './asyncConnect';
 import { connect } from 'react-redux';
 
 const { array, func, object, any, bool } = PropTypes;
@@ -39,32 +39,42 @@ function filterAndFlattenComponents(components) {
 function loadAsyncConnect({components, filter = () => true, skip = () => false, ...rest}) {
   let async = false;
   let incomplete = false;
-  const promise = Promise.all(filterAndFlattenComponents(components).map(Component => {
-    const asyncItems = Component.reduxAsyncConnect;
 
-    return Promise.all(asyncItems.reduce((itemsResults, item) => {
+  const filteredKeys = [];
+  const filteredPromises = [];
+  const allPromises = [];
+
+  filterAndFlattenComponents(components).forEach(Component => {
+    Component.reduxAsyncConnect.forEach(item => {
       if (skip(item)) {
         incomplete = true;
-        return itemsResults;
+        return;
       }
 
       let promiseOrResult = item.promise(rest);
-
-      if (filter(item, Component)) {
-        if (promiseOrResult && promiseOrResult.then instanceof Function) {
+      if (promiseOrResult && promiseOrResult.then instanceof Function) {
+        promiseOrResult = promiseOrResult.catch(error => ({error}));
+        allPromises.push(promiseOrResult);
+        if (filter(item, Component)) {
           async = true;
-          promiseOrResult = promiseOrResult.catch(error => ({error}));
+          filteredKeys.push(item.key);
+          filteredPromises.push(promiseOrResult);
         }
-        return [...itemsResults, promiseOrResult];
-      } else {
-        return itemsResults;
       }
-    }, [])).then(results => {
-      return asyncItems.reduce((result, item, i) => ({...result, [item.key]: results[i]}), {});
     });
-  }));
+  });
 
-  return {promise, async, incomplete};
+  const allPromise = Promise.all(allPromises);
+  const promise = Promise.all(filteredPromises).then(results => {
+    return filteredKeys.reduce((result, key, i) => {
+      if (key) {
+        result[key] = results[i];
+      }
+      return result;
+    }, {});
+  });
+
+  return {allPromise, promise, async, incomplete};
 }
 
 export function loadOnServer(args) {
@@ -86,6 +96,7 @@ class ReduxAsyncConnect extends React.Component {
     render: func.isRequired,
     beginGlobalLoad: func.isRequired,
     endGlobalLoad: func.isRequired,
+    fullEndGlobalLoad: func.isRequired,
     renderIfNotLoaded: bool,
     helpers: any
   };
@@ -147,6 +158,9 @@ class ReduxAsyncConnect extends React.Component {
           }
           this.props.endGlobalLoad();
         });
+        loadResult.allPromise.then(() => {
+          this.props.fullEndGlobalLoad();
+        })
       })(loadDataCounter);
     } else {
       this.setState({propsToShow: props});
@@ -159,4 +173,8 @@ class ReduxAsyncConnect extends React.Component {
   }
 }
 
-export default connect(null, {beginGlobalLoad, endGlobalLoad})(ReduxAsyncConnect);
+export default connect(null, {
+  beginGlobalLoad,
+  endGlobalLoad,
+  fullEndGlobalLoad,
+})(ReduxAsyncConnect);
