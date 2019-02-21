@@ -177,4 +177,6 @@ export default connect(null, {
   beginGlobalLoad,
   endGlobalLoad,
   fullEndGlobalLoad,
+}, null, null, {
+  withRef: true,
 })(ReduxAsyncConnect);
