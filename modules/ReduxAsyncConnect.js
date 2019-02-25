@@ -147,7 +147,7 @@ class ReduxAsyncConnect extends React.Component {
 
     if (loadResult.async) {
       this.props.beginGlobalLoad();
-      (loadDataCounterOriginal => {
+      return (loadDataCounterOriginal => {
         loadResult.promise.then(() => {
           // We need to change propsToShow only if loadAsyncData that called this promise
           // is the last invocation of loadAsyncData method. Otherwise we can face situation
@@ -158,13 +158,14 @@ class ReduxAsyncConnect extends React.Component {
           }
           this.props.endGlobalLoad();
         });
-        loadResult.allPromise.then(() => {
+        return loadResult.allPromise.then(() => {
           this.props.fullEndGlobalLoad();
         })
       })(loadDataCounter);
     } else {
       this.setState({propsToShow: props});
     }
+    return Promise.resolve(null);
   }
 
   render() {
