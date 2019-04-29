@@ -98,10 +98,7 @@ class ReduxAsyncConnect extends React.Component {
     endGlobalLoad: func.isRequired,
     fullEndGlobalLoad: func.isRequired,
     renderIfNotLoaded: bool,
-    helpers: any
-  };
-
-  static contextTypes = {
+    helpers: any,
     store: object.isRequired
   };
 
@@ -112,7 +109,7 @@ class ReduxAsyncConnect extends React.Component {
   };
 
   isLoaded() {
-    return this.context.store.getState().reduxAsyncConnect.loaded;
+    return this.props.store.getState().reduxAsyncConnect.loaded;
   }
 
   constructor(props, context) {
@@ -140,7 +137,7 @@ class ReduxAsyncConnect extends React.Component {
   }
 
   loadAsyncData(props) {
-    const store = this.context.store;
+    const store = this.props.store;
     const loadResult = loadAsyncConnect({...props, store});
 
     loadDataCounter++;
@@ -172,6 +169,15 @@ class ReduxAsyncConnect extends React.Component {
     const {propsToShow} = this.state;
     return propsToShow && this.props.render(propsToShow);
   }
+}
+
+
+function ReactReduxConnectWrapper(props) {
+  return (
+      <ReactReduxContext.Consumer>
+        {({store}) => <ReduxAsyncConnect {...props} store={store} />}
+      </ReactReduxContext.Consumer>
+  );
 }
 
 export default connect(null, {
