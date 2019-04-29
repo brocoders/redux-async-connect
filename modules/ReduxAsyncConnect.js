@@ -172,13 +172,13 @@ class ReduxAsyncConnect extends React.Component {
 }
 
 
-function ReactReduxConnectWrapper(props) {
+const ReactReduxConnectWrapper = React.forwardRef(function ReactReduxConnectWrapper(props, ref) {
   return (
       <ReactReduxContext.Consumer>
-        {({store}) => <ReduxAsyncConnect {...props} store={store} />}
+        {({store}) => <ReduxAsyncConnect {...props} store={store} ref={ref} />}
       </ReactReduxContext.Consumer>
   );
-}
+});
 
 export default connect(null, {
   beginGlobalLoad,
@@ -186,4 +186,4 @@ export default connect(null, {
   fullEndGlobalLoad,
 }, null, {
   forwardRef: true,
-})(ReduxAsyncConnect);
+})(ReactReduxConnectWrapper);
