@@ -80,8 +80,10 @@ function loadAsyncConnect({components, filter = () => true, skip = () => false, 
 export function loadOnServer(args) {
   const result = loadAsyncConnect(args);
   if (result.async && !result.incomplete) {
-    result.promise.then(() => {
+    return result.promise.then(data => {
       args.store.dispatch(endGlobalLoad());
+      args.store.dispatch(fullEndGlobalLoad());
+      return data;
     });
   }
   return result.promise;
@@ -142,7 +144,7 @@ class ReduxAsyncConnect extends React.Component {
 
     loadDataCounter++;
 
-    if (loadResult.async) {
+    if (loadResult && loadResult.then instanceof Function) {
       this.props.beginGlobalLoad();
       return (loadDataCounterOriginal => {
         loadResult.promise.then(() => {
